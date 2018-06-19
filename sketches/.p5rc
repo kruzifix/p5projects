@@ -1,4 +1,6 @@
 {
   "name": "sketches",
-  "projects": []
+  "projects": [
+    "test"
+  ]
 }
