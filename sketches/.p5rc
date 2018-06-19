@@ -2,6 +2,7 @@
   "name": "sketches",
   "projects": [
     "test",
-    "lines"
+    "lines",
+    "metro"
   ]
 }
