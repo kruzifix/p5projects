@@ -1,8 +1,8 @@
 {
   "name": "sketches",
   "projects": [
-    "test",
-    "lines",
+    "rohre",
+    "pcb",
     "metro"
   ]
 }
