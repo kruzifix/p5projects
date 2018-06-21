@@ -3,6 +3,7 @@
   "projects": [
     "rohre",
     "pcb",
-    "metro"
+    "metro",
+    "color-data-vis"
   ]
 }
