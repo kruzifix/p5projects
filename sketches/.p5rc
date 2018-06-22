@@ -4,6 +4,7 @@
     "rohre",
     "pcb",
     "metro",
-    "color-data-vis"
+    "color-data-vis",
+    "pixel-sorting"
   ]
 }
