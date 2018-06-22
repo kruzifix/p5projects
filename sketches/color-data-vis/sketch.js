@@ -11,7 +11,7 @@ function setup() {
 		const c = data.entries[i]
 		const l = c.label
 		c.col = color(c.r, c.g, c.b)
-		c.metric = c.b * 255 * 255 + c.g * 255 + c.r
+		c.metric = hue(c.col)
 
 		if (!labels[l]) {
 			labels[l] = []
