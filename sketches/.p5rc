@@ -5,6 +5,7 @@
     "pcb",
     "metro",
     "color-data-vis",
-    "pixel-sorting"
+    "pixel-sorting",
+    "arcs"
   ]
 }
