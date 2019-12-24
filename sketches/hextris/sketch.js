@@ -14,36 +14,52 @@ let heartBeatTimer = 0;
 let heartBeatPeriod = 1.5;
 
 function setup() {
-    createCanvas(800, 700);
+    createCanvas(800, 720);
 
-    const size = 40;
-    const w = 11;
+    const size = 32;
+    const w = 13;
     const xOff = width / 2 - size * 1.5 * (w - 1) / 2;
-    grid = new HexGrid(w, 11, {
+    grid = new HexGrid(w, 15, {
         size,
         xOff,
-        yOff: -20,
+        yOff: -24,
     });
 
     originalPieces = [
         {
             piece: [
-                { x: 0, y: 1, z: -1 },
                 { x: 0, y: 0, z: 0 },
+                { x: 0, y: 1, z: -1 },
                 { x: 0, y: -1, z: 1 },
             ],
             color: [30, 168, 199],
         },
         {
             piece: [
-                { x: 1, y: 0, z: -1 },
                 { x: 0, y: 0, z: 0 },
+                { x: 1, y: 0, z: -1 },
                 { x: 0, y: -1, z: 1 },
             ],
             color: [199, 145, 30],
         },
+        {
+            piece: [
+                { x: 0, y: 0, z: 0 },
+                { x: -1, y: 1, z: 0 },
+                { x: 0, y: -1, z: 1 },
+            ],
+            color: [191, 30, 199],
+        },
+        {
+            piece: [
+                { x: 0, y: 0, z: 0 },
+                { x: 0, y: 1, z: -1 },
+                { x: 1, y: 0, z: -1 },
+            ],
+            color: [75, 199, 30],
+        },
     ];
-    pieceOrigin = offset2cube({ c: 5, r: 3 });
+    pieceOrigin = offset2cube({ c: 6, r: 2 });
     newPiece();
 }
 
@@ -60,11 +76,21 @@ function draw() {
 
     grid.draw();
 
+    let i = 0;
     for (const p of piece) {
+        const [r, g, b] = pieceColor;
         const pos = cube2offset(addCube(piecePos, p));
         stroke(0);
-        fill(...pieceColor);
-        grid.drawHex(pos.c, pos.r);
+        fill(r * 0.7, g * 0.7, b * 0.7);
+        grid.drawHex(pos.c, pos.r, 1.0);
+        noStroke();
+        fill(r, g, b);
+        grid.drawHex(pos.c, pos.r, i == 0 ? 0.6 : 0.8);
+        // if (i == 0) {
+        //     fill(r * 0.6, g * 0.6, b * 0.6);
+        //     grid.drawHex(pos.c, pos.r, 0.6);
+        // }
+        i++;
     }
 }
 
@@ -79,11 +105,13 @@ function keyPressed() {
         moveDown();
     }
     if (key == 'd') {
+        // TODO: move diagonal down-right
         let offsetPos = cube2offset(piecePos);
         offsetPos.c += 1;
         requestMove(offset2cube(offsetPos));
     }
     if (key == 'a') {
+        // TODO: move diagonal down-left
         let offsetPos = cube2offset(piecePos);
         offsetPos.c -= 1;
         requestMove(offset2cube(offsetPos));
@@ -106,7 +134,6 @@ function moveDown() {
 
     if (!requestMove(reqPos)) {
         // touch down!
-        // TODO: fill grid
         for (let p of piece) {
             const cell = grid.getCube(addCube(piecePos, p));
             cell.filled = true;

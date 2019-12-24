@@ -50,10 +50,10 @@ class HexGrid
         return this.get(off.c, off.r);
     }
 
-    drawHex(c, r) {
+    drawHex(c, r, percent) {
         const px = Math.floor(this.drawOpts.xOff + this.drawOpts.sc * c);
         const py = Math.floor(this.drawOpts.yOff + this.drawOpts.sr * (r + 0.5 * (c & 1)));
-        fillHex(px, py, this.drawOpts.hw, this.drawOpts.hh);
+        fillHex(px, py, this.drawOpts.hw * percent, this.drawOpts.hh * percent);
     }
 
     draw() {
@@ -72,7 +72,7 @@ class HexGrid
                 else
                     fill(r % 2 == 0 ? 166 : 222);
 
-                this.drawHex(c, r);
+                this.drawHex(c, r, 1);
             }
         }
     }
