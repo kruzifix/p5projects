@@ -40,6 +40,14 @@ class HexGrid
         }
     }
 
+    clear() {
+        for (let r = 0; r < this.h; r++) {
+            for (let c = 0; c < this.w; c++) {
+                this.get(c, r).filled = false;
+            }
+        }
+    }
+
     // offset
     get(c, r) {
         return this.cells[r][c];
@@ -70,7 +78,8 @@ class HexGrid
                 if (cell.filled)
                     fill(...cell.fillColor);
                 else
-                    fill(r % 2 == 0 ? 166 : 222);
+                    //fill(r % 2 == 0 ? 166 : 222);
+                    fill(222);
 
                 this.drawHex(c, r, 1);
             }

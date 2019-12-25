@@ -1,17 +1,9 @@
+let lastTime;
 let grid;
+const clearLine = [];
 
-let originalPieces;
-let pieceOrigin;
-
-let piece;
-let piecePos;
-let pieceColor;
-
-let reqPiece;
-let reqPiecePos;
-
-let heartBeatTimer = 0;
-let heartBeatPeriod = 1.5;
+let gameStates;
+let currentGameState;
 
 function setup() {
     createCanvas(800, 720);
@@ -25,174 +17,99 @@ function setup() {
         yOff: -24,
     });
 
-    originalPieces = [
-        {
-            piece: [
-                { x: 0, y: 0, z: 0 },
-                { x: 0, y: 1, z: -1 },
-                { x: 0, y: -1, z: 1 },
-            ],
-            color: [30, 168, 199],
-        },
-        {
-            piece: [
-                { x: 0, y: 0, z: 0 },
-                { x: 1, y: 0, z: -1 },
-                { x: 0, y: -1, z: 1 },
-            ],
-            color: [199, 145, 30],
-        },
-        {
-            piece: [
-                { x: 0, y: 0, z: 0 },
-                { x: -1, y: 1, z: 0 },
-                { x: 0, y: -1, z: 1 },
-            ],
-            color: [191, 30, 199],
-        },
-        {
-            piece: [
-                { x: 0, y: 0, z: 0 },
-                { x: 0, y: 1, z: -1 },
-                { x: 1, y: 0, z: -1 },
-            ],
-            color: [75, 199, 30],
-        },
-    ];
-    pieceOrigin = offset2cube({ c: 6, r: 2 });
-    newPiece();
+    const mid = Math.floor(w / 2) - 1;
+    for (let x = 0; x < mid; x++) {
+        clearLine.push(axial2cube({ q: 1 + x, r: 0 }));
+    }
+    for (let x = 0; x <= mid; x++) {
+        const c = { q: 1 + mid + x, r: -x };
+        clearLine.push(axial2cube(c));
+    }
+
+    for (const p of clearLine) {
+        const off = cube2offset(p);
+        if (off.c == 1)
+            continue;
+        off.r += 8;
+        grid.get(off.c, off.r).filled = true;
+        grid.get(off.c, off.r).fillColor = [200, 0, 0];
+        off.r += 2;
+        grid.get(off.c, off.r).filled = true;
+        grid.get(off.c, off.r).fillColor = [200, 0, 0];
+    }
+
+    gameStates = {
+        'play': new PlayState(grid),
+        'linesCleared': new LinesClearedState(grid),
+        'gameOver': new GameOverState(grid),
+    };
+    switchGameState('play', { spawnNewPiece: true });
+
+    lastTime = millis();
+}
+
+function switchGameState(targetState, data) {
+    currentGameState = gameStates[targetState];
+    currentGameState.enter(data);
 }
 
 function draw() {
-    // const dt = millis() * 0.001;
-    // heartBeatTimer += dt;
-    // if (heartBeatTimer >= heartBeatPeriod) {
-    //     heartBeatTimer -= heartBeatPeriod;
+    const time = millis();
+    const dt = (time - lastTime) * 0.001;
+    lastTime = time;
 
-    //     moveDown();
-    // }
+    currentGameState.update(dt);
 
-    background(0);
-
-    grid.draw();
-
-    let i = 0;
-    for (const p of piece) {
-        const [r, g, b] = pieceColor;
-        const pos = cube2offset(addCube(piecePos, p));
-        stroke(0);
-        fill(r * 0.7, g * 0.7, b * 0.7);
-        grid.drawHex(pos.c, pos.r, 1.0);
-        noStroke();
-        fill(r, g, b);
-        grid.drawHex(pos.c, pos.r, i == 0 ? 0.6 : 0.8);
-        // if (i == 0) {
-        //     fill(r * 0.6, g * 0.6, b * 0.6);
-        //     grid.drawHex(pos.c, pos.r, 0.6);
-        // }
-        i++;
-    }
+    currentGameState.draw();
 }
 
 function keyPressed() {
-    if (key == 'j') {
-        requestRotate(false);
-    }
-    if (key == 'k') {
-        requestRotate(true);
-    }
-    if (key == 's') {
-        moveDown();
-    }
-    if (key == 'd') {
-        // TODO: move diagonal down-right
-        let offsetPos = cube2offset(piecePos);
-        offsetPos.c += 1;
-        requestMove(offset2cube(offsetPos));
-    }
-    if (key == 'a') {
-        // TODO: move diagonal down-left
-        let offsetPos = cube2offset(piecePos);
-        offsetPos.c -= 1;
-        requestMove(offset2cube(offsetPos));
-    }
+    currentGameState.keyPressed(key);
 }
 
-function newPiece() {
-    piecePos = Object.assign({}, pieceOrigin);
-    const index = Math.floor(random() * originalPieces.length);
-    piece = originalPieces[index].piece;
-    pieceColor = originalPieces[index].color;
+// TODO: move functions
+function getShiftOffsets(linesCleared) {
+    let offsets = new Array(linesCleared[0] + 1);
+    let clearPositions = new Array(linesCleared[0] + 1).fill(false);
 
-    // TODO: check for game over
-}
+    for (const line of linesCleared) {
+        clearPositions[line] = true;
+    }
+    clearPositions = clearPositions.reverse();
 
-function moveDown() {
-    let reqPos = Object.assign({}, piecePos);
-    reqPos.y -= 1;
-    reqPos.z += 1;
-
-    if (!requestMove(reqPos)) {
-        // touch down!
-        for (let p of piece) {
-            const cell = grid.getCube(addCube(piecePos, p));
-            cell.filled = true;
-            cell.fillColor = pieceColor;
+    let offset = 1;
+    for (let i = 0; i < clearPositions.length; i++) {
+        // look at target cell and increase offset until not cleared line
+        while ((i + offset) < clearPositions.length && clearPositions[i + offset]) {
+            offset++;
         }
-
-        // TODO: check clears, points!
-        newPiece();
-
-        heartBeatTimer = 0;
+        offsets[i] = offset;
     }
+    return offsets;
 }
 
-// toPos: cube
-function requestMove(toPos) {
-    for (const p of piece) {
-        const cell = grid.getCube(addCube(toPos, p));
-        if (!cell.active || cell.filled) {
-            return false;
+// linesCleared sorted from lowest line (bottom) to highest (top)
+function shiftClearedLines(linesCleared) {
+    let offsets = getShiftOffsets(linesCleared);
+    const lowestLine = linesCleared[0];
+
+    for (const cl of clearLine) {
+        let p = cube2offset(cl);
+        //for (p.r += lowestLine; p.r > 0; p.r--) {
+        for (let i = 0; i < lowestLine; i++) {
+            const index = lowestLine - i;
+            if (index - offsets[i] <= 0)
+                break;
+
+            let cell = grid.get(p.c, p.r + index);
+            let top = grid.get(p.c, p.r + index - offsets[i]);
+            if (cell.active && !top.active) {
+                cell.filled = false;
+            } else if (!cell.active && !top.active) {
+                break;
+            }
+            cell.filled = top.filled;
+            cell.fillColor = top.fillColor;
         }
     }
-    piecePos = Object.assign({}, toPos);
-    return true;
-}
-
-function requestRotate(right) {
-    const newPiece = right ? rotateRight(piece) : rotateLeft(piece);
-    for (const p of newPiece) {
-        const cell = grid.getCube(addCube(piecePos, p));
-        if (!cell.active || cell.filled) {
-            return false;
-        }
-    }
-    piece = newPiece;
-    return true;
-}
-
-function rotateRight(piece) {
-    return rotatePiece(piece, (x, y, z) => ({
-        x: -z,
-        y: -x,
-        z: -y,
-    }));
-}
-
-function rotateLeft(piece) {
-    return rotatePiece(piece, (x, y, z) => ({
-        x: -y,
-        y: -z,
-        z: -x,
-    }));
-}
-
-function rotatePiece(piece, rotFunc) {
-    let res = [];
-
-    for (const p of piece) {
-        res.push(rotFunc(p.x, p.y, p.z));
-    }
-
-    return res;
 }
