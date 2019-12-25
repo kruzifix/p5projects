@@ -5,22 +5,25 @@ const originalPieces = [
             { x: 0, y: 0, z: 0 },
             { x: 0, y: 1, z: -1 },
             { x: 0, y: -1, z: 1 },
+            { x: 0, y: -2, z: 2 },
         ],
         color: [30, 168, 199],
     },
     {
         piece: [
             { x: 0, y: 0, z: 0 },
-            { x: 1, y: 0, z: -1 },
-            { x: 0, y: -1, z: 1 },
+            { x: 0, y: 1, z: -1 },
+            { x: 1, y: -1, z: 0 },
+            { x: 2, y: -2, z: 0 },
         ],
         color: [199, 145, 30],
     },
     {
         piece: [
             { x: 0, y: 0, z: 0 },
-            { x: -1, y: 1, z: 0 },
-            { x: 0, y: -1, z: 1 },
+            { x: 0, y: 1, z: -1 },
+            { x: -1, y: 0, z: 1 },
+            { x: -2, y: 0, z: 2 },
         ],
         color: [191, 30, 199],
     },
@@ -28,6 +31,7 @@ const originalPieces = [
         piece: [
             { x: 0, y: 0, z: 0 },
             { x: 0, y: 1, z: -1 },
+            { x: -1, y: 1, z: 0 },
             { x: 1, y: 0, z: -1 },
         ],
         color: [75, 199, 30],
@@ -39,7 +43,7 @@ class PlayState {
     constructor(grid) {
         this.grid = grid;
         this.heartBeatTimer = 0;
-        this.heartBeatPeriod = 0.8;
+        this.heartBeatPeriod = 1.0;
 
         this.newPiece();
     }

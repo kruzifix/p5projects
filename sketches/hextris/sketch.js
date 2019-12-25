@@ -6,12 +6,13 @@ let gameStates;
 let currentGameState;
 
 function setup() {
-    createCanvas(800, 720);
+    createCanvas(860, 720);
 
-    const size = 32;
+    const size = 24;
     const w = 13;
+    const h = 20;
     const xOff = width / 2 - size * 1.5 * (w - 1) / 2;
-    grid = new HexGrid(w, 15, {
+    grid = new HexGrid(w, h, {
         size,
         xOff,
         yOff: -24,
@@ -26,17 +27,17 @@ function setup() {
         clearLine.push(axial2cube(c));
     }
 
-    for (const p of clearLine) {
-        const off = cube2offset(p);
-        if (off.c == 1)
-            continue;
-        off.r += 8;
-        grid.get(off.c, off.r).filled = true;
-        grid.get(off.c, off.r).fillColor = [200, 0, 0];
-        off.r += 2;
-        grid.get(off.c, off.r).filled = true;
-        grid.get(off.c, off.r).fillColor = [200, 0, 0];
-    }
+    // for (const p of clearLine) {
+    //     const off = cube2offset(p);
+    //     if (off.c == 1)
+    //         continue;
+    //     off.r += 8;
+    //     grid.get(off.c, off.r).filled = true;
+    //     grid.get(off.c, off.r).fillColor = [200, 0, 0];
+    //     off.r += 2;
+    //     grid.get(off.c, off.r).filled = true;
+    //     grid.get(off.c, off.r).fillColor = [200, 0, 0];
+    // }
 
     gameStates = {
         'play': new PlayState(grid),

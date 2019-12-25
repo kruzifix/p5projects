@@ -66,8 +66,6 @@ class HexGrid
 
     draw() {
         stroke(0);
-        fill(200, 0, 0);
-        textAlign(CENTER, CENTER);
         for (let c = 0; c < this.w; c++) {
             for (let r = 0; r < this.h; r++) {
                 const cell = this.get(c, r);
@@ -82,6 +80,17 @@ class HexGrid
                     fill(222);
 
                 this.drawHex(c, r, 1);
+            }
+        }
+
+        noStroke();
+        for (const p of clearLine) {
+            const pos = cube2offset(p);
+            for (let r = 0; r < this.h - 4; r++) {
+                if (r % 2 == 0) {
+                    fill(0, 50);
+                    this.drawHex(pos.c, pos.r + r, 1);
+                }
             }
         }
     }
